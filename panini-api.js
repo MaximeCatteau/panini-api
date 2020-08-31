@@ -12,9 +12,7 @@ var app = express();
 app.use(cors());
  
 let db = new sqlite3.Database('../Discord/Panini/paniniCards.db', (err) => {
-  if (err) {
-      USER_ADMIN.send("La connexion à la base a échoué : ");
-      USER_ADMIN.send(err.message);       
+  if (err) {      
       return console.error(err.message);
   }
 });
