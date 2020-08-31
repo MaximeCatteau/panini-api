@@ -1,0 +1,15 @@
+[
+    {
+        "id": 1,
+        "name": "Équipe de France",
+        "src": "../Discord/Panini/collections/img/1_fff_2018.png"
+    }, {
+        "id": 2,
+        "name": "Hugo Lloris",
+        "src": "../Discord/Panini/collections/img/2_fff_2018.png"
+    }, {
+        "id": 3,
+        "name": "Steve Mandanda",
+        "src": "../Discord/Panini/collections/img/3_fff_2018.png"
+    }
+]
