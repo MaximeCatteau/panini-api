@@ -11,7 +11,7 @@ var port = 3000;
 var app = express(); 
 app.use(cors());
  
-let db = new sqlite3.Database('../Discord/Panini/paniniCards.db', (err) => {
+let db = new sqlite3.Database('../bot-panini/paniniCards.db', (err) => {
   if (err) {      
       return console.error(err.message);
   }
