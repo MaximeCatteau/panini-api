@@ -5,13 +5,17 @@ const sqlite3 = require('sqlite3');
 const cors = require('cors');
  
 // Nous définissons ici les paramètres du serveur.
-var hostname = '51.210.180.207'; 
-var port = 3000; 
+var hostname = '51.210.180.207';
+var localhost = '127.0.0.1';
+var port = 3000;
+
+var prodDb = '../bot-panini/paniniCards.db';
+var localhostDb = '../Discord/Panini/paniniCards.db';
  
 var app = express(); 
 app.use(cors());
  
-let db = new sqlite3.Database('../bot-panini/paniniCards.db', (err) => {
+let db = new sqlite3.Database(prodDb, (err) => {
   if (err) {      
       return console.error(err.message);
   }
@@ -62,7 +66,7 @@ const getCollections = async (req, res, next) => {
   try {
     var collections;
 
-    db.all("SELECT distinct(collection), collectionId from paniniCards", (err, data) => {
+    db.all("SELECT distinct(collection), collectionId from paniniCards order by collectionId asc", (err, data) => {
       if(err){
         console.log("error");
       }
@@ -72,6 +76,57 @@ const getCollections = async (req, res, next) => {
 
     
   } catch (e) {
+    next(e);
+  }
+}
+
+const getCollectionSize = async (req, res, next) => {
+  try {
+    var size;
+    var collectionId = req.params.collectionId;
+
+    db.get("SELECT count(*) from paniniCards where collectionId = " + collectionId, (err, data) => {
+      if(err){
+        console.log(err);
+      }
+      size = data["count(*)"];
+      res.json(size);
+    })
+  } catch(e){
+    next(e);
+  }
+}
+
+const getFirstIndexOfCollection = async (req, res, next) => {
+  try {
+    var firstIndex;
+    var collectionId = req.params.collectionId;
+
+    db.get("SELECT id from paniniCards where collectionId = " + collectionId + " order by id asc LIMIT 1", (err, data) => {
+      if(err){
+        console.log(err);
+      }
+      firstIndex = data["id"];
+      res.json(firstIndex);
+    })
+  } catch(e){
+    next(e);
+  }
+}
+
+const getLastIndexOfCollection = async (req, res, next) => {
+  try {
+    var lastIndex;
+    var collectionId = req.params.collectionId;
+
+    db.get("SELECT id from paniniCards where collectionId = " + collectionId + " order by id desc LIMIT 1", (err, data) => {
+      if(err){
+        console.log(err);
+      }
+      lastIndex = data["id"];
+      res.json(lastIndex);
+    })
+  } catch(e){
     next(e);
   }
 }
@@ -106,10 +161,10 @@ const getPlayerCardsByCollection = async (req, res, next) => {
   try {
     var playerCards;
 
-    var query = "SELECT * from playerCards p left join paniniCards pc on p.cardId = pc.id " +
+    var query = "SELECT pc.name, pc.id, pc.src, p.cardQuantity from playerCards p left join paniniCards pc on p.cardId = pc.id " +
                 "left join players pl on p.playerId = pl.id " +
                 "where p.playerId like '%" + playerId + "%' " +
-                "and pc.collectionId = " + collectionId;
+                "and pc.collectionId = " + collectionId + " order by pc.id asc";
 
     db.all(query , (err, data) => {
       if(err){
@@ -171,6 +226,15 @@ myRouter.route('/cards/:id')
 
 myRouter.route('/collections')
 .get(getCollections);
+
+myRouter.route('/collections/:collectionId/size')
+.get(getCollectionSize);
+
+myRouter.route('/collections/:collectionId/first')
+.get(getFirstIndexOfCollection);
+
+myRouter.route('/collections/:collectionId/last')
+.get(getLastIndexOfCollection);
 
 myRouter.route('/:playerId')
 .get(getPlayerCards);
